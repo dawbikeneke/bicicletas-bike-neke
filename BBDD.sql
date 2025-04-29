@@ -88,18 +88,16 @@ CREATE TABLE facturas (
     fecha_entrega DATE NOT NULL,
     fecha_recogida DATE NOT NULL,
     numero_horas INT,
-    entrega_domicilio BOOLEAN DEFAULT FALSE,
-    direccion_entrega VARCHAR(255),
-    recogida_domicilio BOOLEAN DEFAULT FALSE,
-    direccion_recogida VARCHAR(255),
     cargo_transporte DECIMAL(10,2) DEFAULT 0.00,
     iva_cuota DECIMAL(10,2) NOT NULL,
     total DECIMAL(10,2) NOT NULL,
     forma_pago INT NOT NULL,
     factura_impresa VARCHAR(255),
+    id_alojamiento INT,
     FOREIGN KEY (id_usuario) REFERENCES usuario(id),
     FOREIGN KEY (id_bicicleta) REFERENCES bicicletas(id_bicicleta),
-    FOREIGN KEY (forma_pago) REFERENCES tipo_pagos(id_pago)
+    FOREIGN KEY (forma_pago) REFERENCES tipo_pagos(id_pago),
+    FOREIGN KEY (id_alojamiento) REFERENCES alojamientos(id_alojamiento)
 );
 
 CREATE TABLE alojamientos (
