@@ -2,60 +2,73 @@
 -- DESCRIPCIÓN DE LAS TABLAS Y SUS CAMPOS
 -- -------------------------------------------------
 
--- Tabla usuario:
+-- Tabla usuario
 -- Contiene los datos personales de los clientes.
 -- IMPORTANTE: Los campos 'nombre_apellidos', 'direccion', 'codigo_postal', 'localidad', 'email' y 'nif_cif' serán cifrados antes de almacenarse en la base de datos para cumplir con la protección de datos (LOPD/GDPR).
 
--- Tabla paises:
+-- Tabla paises
 -- Lista de países disponibles para asignar a los clientes.
 
--- Tabla bicicletas:
+-- Tabla bicicletas
 -- Catálogo de modelos de bicicletas, sus precios y disponibilidad.
 
--- Tabla tipos:
+-- Tabla tipos
 -- Define el tipo de usuario: niño, joven, adulto, senior.
 
--- Tabla categorias:
+-- Tabla categorias
 -- Clasifica las bicicletas por su uso: paseo, montaña, tándem.
 
--- Tabla tipo_pagos:
+-- Tabla tipo_pagos
 -- Lista de formas de pago aceptadas.
 
--- Tabla facturas:
+-- Tabla facturas
 -- Registra cada alquiler y su facturación asociada.
 
--- Tabla gestión:
--- Contiene el usuario gestor de la base de datos.
+-- Tabla administracion
+-- Usuarios administradores para acceso al panel de gestión.
+
+-- Tabla tipo_alojamiento
+-- Define los tipos de alojamiento posibles (hotel, camping, apartahotel).
 
 -- Tabla alojamientos
 -- Lista de hoteles, apartahoteles y campings de Blanes para entrega o recogida de bicicletas.
 
 -- -------------------------------------------------
--- SCRIPT DE CREACIÓN DE TABLAS
+-- SCRIPT DE CREACIÓN DE TABLAS PARA MARIADB
 -- -------------------------------------------------
 
 CREATE TABLE paises (
-    id_pais INT AUTO_INCREMENT PRIMARY KEY,
-    pais VARCHAR(100) NOT NULL
+    id_pais INT NOT NULL AUTO_INCREMENT,
+    pais VARCHAR(100) NOT NULL,
+    PRIMARY KEY (id_pais)
 );
 
 CREATE TABLE tipos (
-    id_tipo INT AUTO_INCREMENT PRIMARY KEY,
-    tipo VARCHAR(50) NOT NULL
+    id_tipo INT NOT NULL AUTO_INCREMENT,
+    tipo VARCHAR(50) NOT NULL,
+    PRIMARY KEY (id_tipo)
 );
 
 CREATE TABLE categorias (
-    id_categoria INT AUTO_INCREMENT PRIMARY KEY,
-    categoria VARCHAR(50) NOT NULL
+    id_categoria INT NOT NULL AUTO_INCREMENT,
+    categoria VARCHAR(50) NOT NULL,
+    PRIMARY KEY (id_categoria)
 );
 
 CREATE TABLE tipo_pagos (
-    id_pago INT AUTO_INCREMENT PRIMARY KEY,
-    tipo_pago VARCHAR(50) NOT NULL
+    id_pago INT NOT NULL AUTO_INCREMENT,
+    tipo_pago VARCHAR(50) NOT NULL,
+    PRIMARY KEY (id_pago)
+);
+
+CREATE TABLE tipo_alojamiento (
+    id_tipo_alojamiento INT NOT NULL AUTO_INCREMENT,
+    descripcion VARCHAR(50) NOT NULL,
+    PRIMARY KEY (id_tipo_alojamiento)
 );
 
 CREATE TABLE usuario (
-    id INT AUTO_INCREMENT PRIMARY KEY,
+    id INT NOT NULL AUTO_INCREMENT,
     nombre_apellidos VARCHAR(100) NOT NULL,
     direccion VARCHAR(150),
     codigo_postal VARCHAR(10),
@@ -63,11 +76,12 @@ CREATE TABLE usuario (
     id_pais INT,
     email VARCHAR(100) UNIQUE,
     nif_cif VARCHAR(20) UNIQUE,
-    FOREIGN KEY (id_pais) REFERENCES paises(id_pais)
+    PRIMARY KEY (id),
+    CONSTRAINT fk_usuario_pais FOREIGN KEY (id_pais) REFERENCES paises(id_pais)
 );
 
 CREATE TABLE bicicletas (
-    id_bicicleta INT AUTO_INCREMENT PRIMARY KEY,
+    id_bicicleta INT NOT NULL AUTO_INCREMENT,
     modelo VARCHAR(100) NOT NULL,
     imagen VARCHAR(255),
     id_tipo INT,
@@ -75,12 +89,35 @@ CREATE TABLE bicicletas (
     precio_hora DECIMAL(10,2) NOT NULL,
     precio_dia DECIMAL(10,2) NOT NULL,
     cantidad_disponible INT NOT NULL,
-    FOREIGN KEY (id_tipo) REFERENCES tipos(id_tipo),
-    FOREIGN KEY (id_categoria) REFERENCES categorias(id_categoria)
+    PRIMARY KEY (id_bicicleta),
+    CONSTRAINT fk_bicicleta_tipo FOREIGN KEY (id_tipo) REFERENCES tipos(id_tipo),
+    CONSTRAINT fk_bicicleta_categoria FOREIGN KEY (id_categoria) REFERENCES categorias(id_categoria)
+);
+
+CREATE TABLE alojamientos (
+    id_alojamiento INT NOT NULL AUTO_INCREMENT,
+    nombre VARCHAR(150) NOT NULL,
+    id_tipo_alojamiento INT NOT NULL,
+    direccion VARCHAR(255) NOT NULL,
+    codigo_postal VARCHAR(10) DEFAULT '17300',
+    localidad VARCHAR(100) DEFAULT 'Blanes',
+    provincia VARCHAR(100) DEFAULT 'Girona',
+    pais VARCHAR(100) DEFAULT 'España',
+    PRIMARY KEY (id_alojamiento),
+    CONSTRAINT fk_alojamiento_tipo FOREIGN KEY (id_tipo_alojamiento) REFERENCES tipo_alojamiento(id_tipo_alojamiento)
+);
+
+CREATE TABLE administracion (
+    id_admin INT NOT NULL AUTO_INCREMENT,
+    nombre_usuario VARCHAR(50) NOT NULL UNIQUE,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id_admin)
 );
 
 CREATE TABLE facturas (
-    id INT AUTO_INCREMENT PRIMARY KEY,
+    id INT NOT NULL AUTO_INCREMENT,
     numero_factura VARCHAR(20) NOT NULL UNIQUE,
     fecha DATE NOT NULL,
     id_usuario INT NOT NULL,
@@ -94,77 +131,57 @@ CREATE TABLE facturas (
     forma_pago INT NOT NULL,
     factura_impresa VARCHAR(255),
     id_alojamiento INT,
-    FOREIGN KEY (id_usuario) REFERENCES usuario(id),
-    FOREIGN KEY (id_bicicleta) REFERENCES bicicletas(id_bicicleta),
-    FOREIGN KEY (forma_pago) REFERENCES tipo_pagos(id_pago),
-    FOREIGN KEY (id_alojamiento) REFERENCES alojamientos(id_alojamiento)
-);
-
-CREATE TABLE alojamientos (
-    id_alojamiento INT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(150) NOT NULL,
-    tipo_alojamiento ENUM('Hotel', 'Apartahotel', 'Camping') NOT NULL,
-    direccion VARCHAR(255) NOT NULL,
-    codigo_postal VARCHAR(10) DEFAULT '17300',
-    localidad VARCHAR(100) DEFAULT 'Blanes',
-    provincia VARCHAR(100) DEFAULT 'Girona',
-    pais VARCHAR(100) DEFAULT 'España'
-);
-
-CREATE TABLE gestion (
-    id_admin INT AUTO_INCREMENT PRIMARY KEY,
-    nombre_usuario VARCHAR(50) NOT NULL UNIQUE,  -- Nombre de usuario (login).
-    email VARCHAR(100) NOT NULL UNIQUE,           -- email.
-    pass_hash VARCHAR(255) NOT NULL,           -- Hash seguro de la contraseña.
+    PRIMARY KEY (id),
+    CONSTRAINT fk_factura_usuario FOREIGN KEY (id_usuario) REFERENCES usuario(id),
+    CONSTRAINT fk_factura_bicicleta FOREIGN KEY (id_bicicleta) REFERENCES bicicletas(id_bicicleta),
+    CONSTRAINT fk_factura_pago FOREIGN KEY (forma_pago) REFERENCES tipo_pagos(id_pago),
+    CONSTRAINT fk_factura_alojamiento FOREIGN KEY (id_alojamiento) REFERENCES alojamientos(id_alojamiento)
 );
 
 -- -------------------------------------------------
 -- INSERCIONES INICIALES DE DATOS
 -- -------------------------------------------------
 
-INSERT INTO administracion (nombre_usuario, email, pass_hash)
-VALUES (
-    'admin',
-    'gestion@bikeneke.com',
-    '$2y$10$G5TGuHOKfyAYLXMXLgIviOHLssFrG1DX/zMbO8Bp84BSHTf5pT46e'
-);
-
--- Insertar categorias
 INSERT INTO categorias (categoria) VALUES
 ('Paseo'),
 ('Montaña'),
 ('Tándem');
 
--- Insertar tipos
 INSERT INTO tipos (tipo) VALUES
 ('Niño'),
 ('Joven'),
 ('Adulto'),
 ('Senior');
 
--- Insertar tipos de pago
 INSERT INTO tipo_pagos (tipo_pago) VALUES
 ('Metálico'),
 ('Tarjeta de crédito'),
 ('Bizum');
 
--- Insertar alojamientos en Blanes
-INSERT INTO alojamientos (nombre, tipo_alojamiento, direccion) VALUES
-('Hotel Beverly Park & Spa', 'Hotel', 'Merce Rodoreda, 7'),
-('Hotel Horitzo by Pierre & Vacances', 'Hotel', 'Paseo Marítimo S´Abanell 11'),
-('Hotel Blaucel', 'Hotel', 'Avenida Villa de Madrid, 27'),
-('Hotel Costa Brava', 'Hotel', 'Anselm Clavé, 48'),
-('Hotel Stella Maris', 'Hotel', 'Avenida Vila de Madrid, 18'),
-('Hotel Pimar & Spa', 'Hotel', 'Paseo S'Abanell 8'),
-('Hostal Miranda', 'Hotel', 'Josep Tarradellas, 50'),
-('Hotel Boix Mar', 'Hotel', 'Enric Morera, 5'),
-('Petit Palau - Adults Only', 'Hotel', 'Lluis Companys, 19'),
-('Hotel Esplendid', 'Hotel', 'Avenida Mediterrani, 17'),
-('Camping Bella Terra', 'Camping', 'Avinguda Vila de Madrid, s/n'),
-('Camping Blanes', 'Camping', 'Carrer Cristòfor Colom, 48'),
-('Camping La Masia', 'Camping', 'Carrer Colom, 44'),
-('Apartaments AR Blavamar - San Marcos', 'Apartahotel', 'Carrer Josep Tarradellas, 2'),
-('Apartamentos Europa Sun', 'Apartahotel', 'Av. Mediterrani, 6');
+INSERT INTO tipo_alojamiento (descripcion) VALUES
+('Hotel'),
+('Camping'),
+('Apartahotel');
+
+INSERT INTO administracion (nombre_usuario, email, password_hash)
+VALUES ('admin', 'gestion@bikeneke.com', '$2y$10$G5TGuHOKfyAYLXMXLgIviOHLssFrG1DX/zMbO8Bp84BSHTf5pT46e');
+
+INSERT INTO alojamientos (nombre, id_tipo_alojamiento, direccion) VALUES
+('Hotel Beverly Park & Spa', 1, 'Merce Rodoreda, 7'),
+('Hotel Horitzo by Pierre & Vacances', 1, 'Paseo Marítimo S´Abanell 11'),
+('Hotel Blaucel', 1, 'Avenida Villa de Madrid, 27'),
+('Hotel Costa Brava', 1, 'Anselm Clavé, 48'),
+('Hotel Stella Maris', 1, 'Avenida Vila de Madrid, 18'),
+('Hotel Pimar & Spa', 1, "Paseo S'Abanell 8"),
+('Hostal Miranda', 1, 'Josep Tarradellas, 50'),
+('Hotel Boix Mar', 1, 'Enric Morera, 5'),
+('Petit Palau - Adults Only', 1, 'Lluis Companys, 19'),
+('Hotel Esplendid', 1, 'Avenida Mediterrani, 17'),
+('Camping Bella Terra', 2, 'Avinguda Vila de Madrid, s/n'),
+('Camping Blanes', 2, 'Carrer Cristòfor Colom, 48'),
+('Camping La Masia', 2, 'Carrer Colom, 44'),
+('Apartaments AR Blavamar - San Marcos', 3, 'Carrer Josep Tarradellas, 2'),
+('Apartamentos Europa Sun', 3, 'Av. Mediterrani, 6');
 
 -- Insertar paises
 INSERT INTO paises (pais) VALUES
