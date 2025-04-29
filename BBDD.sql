@@ -27,6 +27,8 @@
 -- Tabla gestión:
 -- Contiene el usuario gestor de la base de datos.
 
+-- Tabla alojamientos
+-- Lista de hoteles, apartahoteles y campings de Blanes para entrega o recogida de bicicletas.
 
 -- -------------------------------------------------
 -- SCRIPT DE CREACIÓN DE TABLAS
