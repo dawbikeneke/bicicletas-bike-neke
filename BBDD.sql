@@ -100,6 +100,17 @@ CREATE TABLE facturas (
     FOREIGN KEY (forma_pago) REFERENCES tipo_pagos(id_pago)
 );
 
+CREATE TABLE alojamientos (
+    id_alojamiento INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(150) NOT NULL,
+    tipo_alojamiento ENUM('Hotel', 'Apartahotel', 'Camping') NOT NULL,
+    direccion VARCHAR(255) NOT NULL,
+    codigo_postal VARCHAR(10) DEFAULT '17300',
+    localidad VARCHAR(100) DEFAULT 'Blanes',
+    provincia VARCHAR(100) DEFAULT 'Girona',
+    pais VARCHAR(100) DEFAULT 'España'
+);
+
 CREATE TABLE gestion (
     id_admin INT AUTO_INCREMENT PRIMARY KEY,
     nombre_usuario VARCHAR(50) NOT NULL UNIQUE,  -- Nombre de usuario (login).
@@ -136,6 +147,24 @@ INSERT INTO tipo_pagos (tipo_pago) VALUES
 ('Metálico'),
 ('Tarjeta de crédito'),
 ('Bizum');
+
+-- Insertar alojamientos en Blanes
+INSERT INTO alojamientos (nombre, tipo_alojamiento, direccion) VALUES
+('Hotel Beverly Park & Spa', 'Hotel', 'Merce Rodoreda, 7'),
+('Hotel Horitzo by Pierre & Vacances', 'Hotel', 'Paseo Marítimo S´Abanell 11'),
+('Hotel Blaucel', 'Hotel', 'Avenida Villa de Madrid, 27'),
+('Hotel Costa Brava', 'Hotel', 'Anselm Clavé, 48'),
+('Hotel Stella Maris', 'Hotel', 'Avenida Vila de Madrid, 18'),
+('Hotel Pimar & Spa', 'Hotel', 'Paseo S'Abanell 8'),
+('Hostal Miranda', 'Hotel', 'Josep Tarradellas, 50'),
+('Hotel Boix Mar', 'Hotel', 'Enric Morera, 5'),
+('Petit Palau - Adults Only', 'Hotel', 'Lluis Companys, 19'),
+('Hotel Esplendid', 'Hotel', 'Avenida Mediterrani, 17'),
+('Camping Bella Terra', 'Camping', 'Avinguda Vila de Madrid, s/n'),
+('Camping Blanes', 'Camping', 'Carrer Cristòfor Colom, 48'),
+('Camping La Masia', 'Camping', 'Carrer Colom, 44'),
+('Apartaments AR Blavamar - San Marcos', 'Apartahotel', 'Carrer Josep Tarradellas, 2'),
+('Apartamentos Europa Sun', 'Apartahotel', 'Av. Mediterrani, 6');
 
 -- Insertar paises
 INSERT INTO paises (pais) VALUES
