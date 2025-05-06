@@ -10,7 +10,7 @@ function verificarAdmin() {
 
 function iniciarSesion() {
     if (isset($_SESSION['admin_id'])) {
-        header('Location: admin/dashboard.php');
+        header('Location: gestion/dashboard.php');
         exit;
     }
 }

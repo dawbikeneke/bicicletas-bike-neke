@@ -20,7 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $_SESSION['admin_email'] = $admin['email'];
 
         // Redirigimos al panel de administración
-        header('Location: ../public/admin/dashboard.php');
+        header('Location: ../private/gestion/dashboard.php');
         exit;
     } else {
         // Credenciales incorrectas
